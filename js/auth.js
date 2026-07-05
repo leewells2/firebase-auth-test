@@ -53,3 +53,15 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
 });
 
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+
+    if (user) {
+
+        window.location.href = "dashboard.html";
+
+    }
+
+});
+
