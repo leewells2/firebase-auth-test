@@ -1,40 +1,57 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { auth } from "./firebase.js";
 
 import {
-getAuth,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
-const firebaseConfig = {
-
-apiKey: "YOUR_API_KEY",
-
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-
-projectId: "YOUR_PROJECT",
-
-appId: "YOUR_APP_ID"
-
-};
-
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const email = document.getElementById("email");
-
 const password = document.getElementById("password");
-
 const status = document.getElementById("status");
 
-document.getElementById("signupBtn").onclick = () => {
+document.getElementById("signupBtn").addEventListener("click", async () => {
 
-createUserWithEmailAndPassword(auth,email.value,password.value)
+    try {
 
-.then(() => {
+        await createUserWithEmailAndPassword(
+            auth,
+            email.value,
+            password.value
+        );
 
+        status.textContent = "Account created successfully.";
+
+    }
+
+    catch(error){
+
+        status.textContent = error.message;
+
+    }
+
+});
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+    try{
+
+        await signInWithEmailAndPassword(
+            auth,
+            email.value,
+            password.value
+        );
+
+        window.location.href = "dashboard.html";
+
+    }
+
+    catch(error){
+
+        status.textContent = error.message;
+
+    }
+
+});
 status.textContent="Account created!";
 
 })
