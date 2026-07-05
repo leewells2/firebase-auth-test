@@ -1,36 +1,26 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { auth } from "./firebase.js";
 
 import {
-getAuth,
-onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCfngAhk7v_L94p2L88voW67vM9yDn9XnI",
-  authDomain: "wasteland-works-auth.firebaseapp.com",
-  projectId: "wasteland-works-auth",
-  storageBucket: "wasteland-works-auth.firebasestorage.app",
-  messagingSenderId: "702409339029",
-  appId: "1:702409339029:web:bbf4a65cb05980a7d2eb9c"
-};
+onAuthStateChanged(auth, (user) => {
 
-const app = initializeApp(firebaseConfig);
+    if (!user) {
 
-const auth = getAuth(app);
+        window.location.href = "index.html";
 
-onAuthStateChanged(auth,user=>{
-
-if(!user){
-
-window.location="index.html";
-
-}
+    }
 
 });
 
-document.getElementById("logoutBtn").onclick=()=>{
+document
+    .getElementById("logoutBtn")
+    .addEventListener("click", async () => {
 
-signOut(auth);
+        await signOut(auth);
 
-};
+        window.location.href = "index.html";
+
+    });
