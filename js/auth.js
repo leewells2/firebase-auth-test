@@ -98,7 +98,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
         window.location.href = "dashboard.html";
 
-    }
 
     catch(error){
 
