@@ -19,6 +19,8 @@ const statusMessage = document.getElementById("status");
 const signupButton = document.getElementById("signupBtn");
 const loginButton = document.getElementById("loginBtn");
 
+let authenticationInProgress = false;
+
 function showStatus(message) {
     statusMessage.textContent = message;
 }
@@ -38,6 +40,8 @@ signupButton.addEventListener("click", async () => {
         return;
     }
 
+    authenticationInProgress = true;
+
     try {
         showStatus("Creating account...");
 
@@ -49,6 +53,8 @@ signupButton.addEventListener("click", async () => {
 
         const user = userCredential.user;
 
+        showStatus("Saving profile...");
+
         await setDoc(doc(db, "users", user.uid), {
             uid: user.uid,
             username,
@@ -58,6 +64,8 @@ signupButton.addEventListener("click", async () => {
 
         window.location.href = "dashboard.html";
     } catch (error) {
+        authenticationInProgress = false;
+        console.error(error);
         showStatus(error.message);
     }
 });
@@ -65,6 +73,8 @@ signupButton.addEventListener("click", async () => {
 loginButton.addEventListener("click", async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
+
+    authenticationInProgress = true;
 
     try {
         showStatus("Logging in...");
@@ -77,12 +87,14 @@ loginButton.addEventListener("click", async () => {
 
         window.location.href = "dashboard.html";
     } catch (error) {
+        authenticationInProgress = false;
+        console.error(error);
         showStatus(error.message);
     }
 });
 
 onAuthStateChanged(auth, (user) => {
-    if (user) {
+    if (user && !authenticationInProgress) {
         window.location.href = "dashboard.html";
     }
 });
