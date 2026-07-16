@@ -97,32 +97,3 @@ onAuthStateChanged(auth, (user) => {
     }
 
 });
-        await signInWithEmailAndPassword(
-            auth,
-            email.value,
-            password.value
-        );
-
-        window.location.href = "dashboard.html";
-
-    }
-
-    catch(error){
-
-        status.textContent = error.message;
-
-    }
-
-});
-
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-
-    if (user) {
-
-        window.location.href = "dashboard.html";
-
-    }
-
-});
