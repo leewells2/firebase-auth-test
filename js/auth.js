@@ -38,15 +38,41 @@ signupButton.addEventListener("click", async () => {
         return;
     }
 
-    try {
-        showStatus("Creating account...");
+try {
+    showStatus("Creating account...");
 
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+    const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+    );
 
+    console.log("Authentication account created!");
+
+    const user = userCredential.user;
+
+    console.log(user.uid);
+
+    console.log("Writing Firestore document...");
+
+    await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        username,
+        email: user.email,
+        createdAt: serverTimestamp()
+    });
+
+    console.log("Firestore document created!");
+
+    window.location.href = "dashboard.html";
+
+} catch (error) {
+
+    console.error(error);
+
+    showStatus(error.message);
+
+}
         const user = userCredential.user;
 
         await setDoc(doc(db, "users", user.uid), {
