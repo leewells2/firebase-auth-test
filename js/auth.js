@@ -55,13 +55,23 @@ signupButton.addEventListener("click", async () => {
 
         showStatus("Saving profile...");
 
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            username,
-            email: user.email,
-            createdAt: serverTimestamp()
-        });
+        console.log("About to write to Firestore...");
+        
+        try {
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                username,
+                email: user.email,
+                createdAt: serverTimestamp()
+            });
 
+            console.log("Firestore write succeeded!");
+
+        } catch (err) {
+            console.error("Firestore write failed:", err);
+            showStatus(err.message);
+        }
+        
         window.location.href = "dashboard.html";
     } catch (error) {
         authenticationInProgress = false;
