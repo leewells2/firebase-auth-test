@@ -13,40 +13,59 @@ import {
 const welcomeMessage = document.getElementById("welcomeMessage");
 const usernameDisplay = document.getElementById("usernameDisplay");
 const emailDisplay = document.getElementById("emailDisplay");
-const statusMessage = document.getElementById("status");
-const logoutButton = document.getElementById("logoutBtn");
+const createdDisplay = document.getElementById("createdDisplay");
+const status = document.getElementById("status");
 
 onAuthStateChanged(auth, async (user) => {
+
     if (!user) {
         window.location.href = "index.html";
         return;
     }
 
     try {
-        const profileReference = doc(db, "users", user.uid);
-        const profileSnapshot = await getDoc(profileReference);
 
-        if (profileSnapshot.exists()) {
-            const profile = profileSnapshot.data();
+        const snapshot = await getDoc(doc(db, "users", user.uid));
+
+        if (snapshot.exists()) {
+
+            const profile = snapshot.data();
 
             welcomeMessage.textContent = `Welcome, ${profile.username}!`;
-            usernameDisplay.textContent = `Username: ${profile.username}`;
+
+            usernameDisplay.textContent = profile.username;
+
+            emailDisplay.textContent = profile.email;
+
+            if (profile.createdAt) {
+
+                createdDisplay.textContent =
+                    profile.createdAt.toDate().toLocaleString();
+
+            } else {
+
+                createdDisplay.textContent = "Unknown";
+
+            }
+
         } else {
-            welcomeMessage.textContent = "Welcome!";
-            usernameDisplay.textContent = "No profile document was found.";
+
+            welcomeMessage.textContent = "Profile not found.";
+
         }
 
-        emailDisplay.textContent = `Email: ${user.email}`;
     } catch (error) {
-        statusMessage.textContent = error.message;
+
+        status.textContent = error.message;
+
     }
+
 });
 
-logoutButton.addEventListener("click", async () => {
-    try {
-        await signOut(auth);
-        window.location.href = "index.html";
-    } catch (error) {
-        statusMessage.textContent = error.message;
-    }
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+
+    await signOut(auth);
+
+    window.location.href = "index.html";
+
 });
