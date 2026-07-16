@@ -1,28 +1,3 @@
-import { auth, db } from "./firebase.js";
-
-import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-
-import {
-    doc,
-    setDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-const usernameInput = document.getElementById("username");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const statusMessage = document.getElementById("status");
-const signupButton = document.getElementById("signupBtn");
-const loginButton = document.getElementById("loginBtn");
-
-function showStatus(message) {
-    statusMessage.textContent = message;
-}
-
 signupButton.addEventListener("click", async () => {
     const username = usernameInput.value.trim();
     const email = emailInput.value.trim();
@@ -38,42 +13,22 @@ signupButton.addEventListener("click", async () => {
         return;
     }
 
-try {
-    showStatus("Creating account...");
+    try {
+        showStatus("Creating account...");
 
-    const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-    );
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
 
-    console.log("Authentication account created!");
+        console.log("Authentication account created!");
 
-    const user = userCredential.user;
-
-    console.log(user.uid);
-
-    console.log("Writing Firestore document...");
-
-    await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        username,
-        email: user.email,
-        createdAt: serverTimestamp()
-    });
-
-    console.log("Firestore document created!");
-
-    window.location.href = "dashboard.html";
-
-} catch (error) {
-
-    console.error(error);
-
-    showStatus(error.message);
-
-}
         const user = userCredential.user;
+
+        console.log(user.uid);
+
+        console.log("Writing Firestore document...");
 
         await setDoc(doc(db, "users", user.uid), {
             uid: user.uid,
@@ -82,33 +37,14 @@ try {
             createdAt: serverTimestamp()
         });
 
+        console.log("Firestore document created!");
+
         window.location.href = "dashboard.html";
+
     } catch (error) {
+
+        console.error(error);
         showStatus(error.message);
-    }
-});
 
-loginButton.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-    try {
-        showStatus("Logging in...");
-
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        window.location.href = "dashboard.html";
-    } catch (error) {
-        showStatus(error.message);
-    }
-});
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        window.location.href = "dashboard.html";
     }
 });
