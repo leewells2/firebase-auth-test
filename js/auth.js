@@ -9,32 +9,83 @@ import {
 import {
     doc,
     setDoc,
-    getDocs,
-    collection,
-    query,
-    where
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-const username = document.getElementById("username");
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const status = document.getElementById("status");
+const usernameInput = document.getElementById("username");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const statusMessage = document.getElementById("status");
+const signupButton = document.getElementById("signupBtn");
+const loginButton = document.getElementById("loginBtn");
 
-document.getElementById("signupBtn").addEventListener("click", async () => {
+function showStatus(message) {
+    statusMessage.textContent = message;
+}
+
+signupButton.addEventListener("click", async () => {
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!username) {
+        showStatus("Please enter a username.");
+        return;
+    }
+
+    if (username.length < 3) {
+        showStatus("Username must be at least 3 characters.");
+        return;
+    }
 
     try {
+        showStatus("Creating account...");
 
-        if (!username.value.trim()) {
-            status.textContent = "Please enter a username.";
-            return;
-        }
-
-        // Check if username already exists
-        const usernameQuery = query(
-            collection(db, "users"),
-            where("username", "==", username.value.trim())
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
         );
 
+        const user = userCredential.user;
+
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            username,
+            email: user.email,
+            createdAt: serverTimestamp()
+        });
+
+        window.location.href = "dashboard.html";
+    } catch (error) {
+        showStatus(error.message);
+    }
+});
+
+loginButton.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    try {
+        showStatus("Logging in...");
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        window.location.href = "dashboard.html";
+    } catch (error) {
+        showStatus(error.message);
+    }
+});
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        window.location.href = "dashboard.html";
+    }
+});
         const usernameSnapshot = await getDocs(usernameQuery);
 
         if (!usernameSnapshot.empty) {
