@@ -1,3 +1,4 @@
+import { ensureUserProfile } from "./profile.js";
 import { auth, db } from "./firebase.js";
 
 import {
