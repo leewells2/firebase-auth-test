@@ -1,17 +1,12 @@
+import { auth } from "./firebase.js";
 import { ensureUserProfile } from "./profile.js";
-import { auth, db } from "./firebase.js";
 
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    onAuthStateChanged
+    onAuthStateChanged,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-
-import {
-    doc,
-    setDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const usernameInput = document.getElementById("username");
 const emailInput = document.getElementById("email");
@@ -23,89 +18,114 @@ const loginButton = document.getElementById("loginBtn");
 let authenticationInProgress = false;
 
 function showStatus(message) {
-    statusMessage.textContent = message;
+    if (statusMessage) {
+        statusMessage.textContent = message;
+    }
 }
 
-signupButton.addEventListener("click", async () => {
-    const username = usernameInput.value.trim();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
+if (signupButton) {
 
-    if (!username) {
-        showStatus("Please enter a username.");
-        return;
-    }
+    signupButton.addEventListener("click", async () => {
 
-    if (username.length < 3) {
-        showStatus("Username must be at least 3 characters.");
-        return;
-    }
+        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-    authenticationInProgress = true;
+        if (!username) {
+            showStatus("Please enter a username.");
+            return;
+        }
 
-    try {
-        showStatus("Creating account...");
+        if (username.length < 3) {
+            showStatus("Username must be at least 3 characters.");
+            return;
+        }
 
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+        authenticationInProgress = true;
 
-        const user = userCredential.user;
-
-        showStatus("Saving profile...");
-
-        console.log("About to write to Firestore...");
-        
         try {
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                username,
-                email: user.email,
-                createdAt: serverTimestamp()
+
+            showStatus("Creating account...");
+
+            const userCredential =
+                await createUserWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+            await updateProfile(userCredential.user, {
+                displayName: username
             });
 
-            console.log("Firestore write succeeded!");
+            await ensureUserProfile(userCredential.user);
 
-        } catch (err) {
-            console.error("Firestore write failed:", err);
-            showStatus(err.message);
+            window.location.href = "dashboard.html";
+
         }
-        
-        window.location.href = "dashboard.html";
-    } catch (error) {
-        authenticationInProgress = false;
-        console.error(error);
-        showStatus(error.message);
-    }
-});
 
-loginButton.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
+        catch (error) {
 
-    authenticationInProgress = true;
+            authenticationInProgress = false;
 
-    try {
-        showStatus("Logging in...");
+            console.error(error);
 
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+            showStatus(error.message);
 
-        window.location.href = "dashboard.html";
-    } catch (error) {
-        authenticationInProgress = false;
-        console.error(error);
-        showStatus(error.message);
-    }
-});
+        }
 
-onAuthStateChanged(auth, (user) => {
+    });
+
+}
+
+if (loginButton) {
+
+    loginButton.addEventListener("click", async () => {
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        authenticationInProgress = true;
+
+        try {
+
+            showStatus("Logging in...");
+
+            const userCredential =
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+            await ensureUserProfile(userCredential.user);
+
+            window.location.href = "dashboard.html";
+
+        }
+
+        catch (error) {
+
+            authenticationInProgress = false;
+
+            console.error(error);
+
+            showStatus(error.message);
+
+        }
+
+    });
+
+}
+
+onAuthStateChanged(auth, async (user) => {
+
     if (user && !authenticationInProgress) {
+
+        await ensureUserProfile(user);
+
         window.location.href = "dashboard.html";
+
     }
+
 });
