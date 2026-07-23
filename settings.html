@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Settings | Wasteland Works</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<header id="header"></header>
+
+<main>
+
+    <h1>Account Settings</h1>
+
+    <hr>
+
+    <h2>Profile</h2>
+
+    <label>
+
+        Display Name
+
+        <input
+            type="text"
+            id="displayName">
+
+    </label>
+
+    <br><br>
+
+    <label>
+
+        Username
+
+        <input
+            type="text"
+            id="username">
+
+    </label>
+
+    <br><br>
+
+    <button id="saveProfileBtn">
+
+        Save Profile
+
+    </button>
+
+    <hr>
+
+    <h2>Email</h2>
+
+    <p>
+
+        Current Email:
+
+        <span id="currentEmail"></span>
+
+    </p>
+
+    <p>
+
+        Status:
+
+        <span id="verificationStatus"></span>
+
+    </p>
+
+    <button id="verifyEmailBtn">
+
+        Send Verification Email
+
+    </button>
+
+    <br><br>
+
+    <input
+        type="email"
+        id="newEmail"
+        placeholder="New Email">
+
+    <button id="changeEmailBtn">
+
+        Change Email
+
+    </button>
+
+    <hr>
+
+    <h2>Password</h2>
+
+    <button id="changePasswordBtn">
+
+        Send Password Reset Email
+
+    </button>
+
+    <p id="status"></p>
+
+</main>
+
+<footer id="footer"></footer>
+
+<script type="module" src="js/components.js"></script>
+
+<script type="module" src="js/settings.js"></script>
+
+</body>
+
+</html>
