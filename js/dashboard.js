@@ -1,71 +1,138 @@
-import { auth, db } from "./firebase.js";
+import { auth } from "./firebase.js";
+import { getUserProfile } from "./profile.js";
 
 import {
     onAuthStateChanged,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
-import {
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
 const welcomeMessage = document.getElementById("welcomeMessage");
 const usernameDisplay = document.getElementById("usernameDisplay");
 const emailDisplay = document.getElementById("emailDisplay");
 const createdDisplay = document.getElementById("createdDisplay");
-const status = document.getElementById("status");
+const statusDisplay = document.getElementById("status");
+const logoutButton = document.getElementById("logoutBtn");
+
+function showStatus(message) {
+
+    if (statusDisplay) {
+        statusDisplay.textContent = message;
+    }
+
+}
+
+async function loadDashboard(user) {
+
+    try {
+
+        const profile = await getUserProfile(user.uid);
+
+        if (!profile) {
+
+            welcomeMessage.textContent = "Profile not found.";
+
+            return;
+
+        }
+
+        /*
+            Welcome Message
+        */
+
+        welcomeMessage.textContent =
+            `Welcome, ${profile.displayName || profile.username}!`;
+
+        /*
+            Username
+        */
+
+        usernameDisplay.textContent =
+            profile.username ?? "Unknown";
+
+        /*
+            Email
+        */
+
+        emailDisplay.textContent =
+            profile.email ?? "Unknown";
+
+        /*
+            Member Since
+        */
+
+        if (profile.createdAt) {
+
+            createdDisplay.textContent =
+                profile.createdAt
+                    .toDate()
+                    .toLocaleDateString();
+
+        }
+
+        else {
+
+            createdDisplay.textContent = "Unknown";
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        showStatus(error.message);
+
+    }
+
+}
+
+/*
+    ==========================
+    AUTHENTICATION
+    ==========================
+*/
 
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
+
         window.location.href = "index.html";
+
         return;
+
     }
 
-    try {
+    await loadDashboard(user);
 
-        const snapshot = await getDoc(doc(db, "users", user.uid));
+});
 
-        if (snapshot.exists()) {
+/*
+    ==========================
+    LOGOUT
+    ==========================
+*/
 
-            const profile = snapshot.data();
+if (logoutButton) {
 
-            welcomeMessage.textContent = `Welcome, ${profile.username}!`;
+    logoutButton.addEventListener("click", async () => {
 
-            usernameDisplay.textContent = profile.username;
+        try {
 
-            emailDisplay.textContent = profile.email;
+            await signOut(auth);
 
-            if (profile.createdAt) {
-
-                createdDisplay.textContent =
-                    profile.createdAt.toDate().toLocaleString();
-
-            } else {
-
-                createdDisplay.textContent = "Unknown";
-
-            }
-
-        } else {
-
-            welcomeMessage.textContent = "Profile not found.";
+            window.location.href = "index.html";
 
         }
 
-    } catch (error) {
+        catch (error) {
 
-        status.textContent = error.message;
+            console.error(error);
 
-    }
+            showStatus(error.message);
 
-});
+        }
 
-document.getElementById("logoutBtn").addEventListener("click", async () => {
+    });
 
-    await signOut(auth);
-
-    window.location.href = "index.html";
-
-});
+}
