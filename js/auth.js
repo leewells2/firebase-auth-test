@@ -11,17 +11,25 @@ import {
 const usernameInput = document.getElementById("username");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
-const statusMessage = document.getElementById("status");
+
 const signupButton = document.getElementById("signupBtn");
 const loginButton = document.getElementById("loginBtn");
+
+const status = document.getElementById("status");
 
 let authenticationInProgress = false;
 
 function showStatus(message) {
-    if (statusMessage) {
-        statusMessage.textContent = message;
+    if (status) {
+        status.textContent = message;
     }
 }
+
+/*
+    ==========================
+    CREATE ACCOUNT
+    ==========================
+*/
 
 if (signupButton) {
 
@@ -47,18 +55,29 @@ if (signupButton) {
 
             showStatus("Creating account...");
 
-            const userCredential =
+            const credential =
                 await createUserWithEmailAndPassword(
                     auth,
                     email,
                     password
                 );
 
-            await updateProfile(userCredential.user, {
+            /*
+                Store the username inside Firebase Authentication.
+
+                Firestore will automatically read this when it creates
+                the profile.
+            */
+
+            await updateProfile(credential.user, {
                 displayName: username
             });
 
-            await ensureUserProfile(userCredential.user);
+            /*
+                Create (or repair) the Firestore profile.
+            */
+
+            await ensureUserProfile(credential.user);
 
             window.location.href = "dashboard.html";
 
@@ -66,9 +85,9 @@ if (signupButton) {
 
         catch (error) {
 
-            authenticationInProgress = false;
-
             console.error(error);
+
+            authenticationInProgress = false;
 
             showStatus(error.message);
 
@@ -77,6 +96,12 @@ if (signupButton) {
     });
 
 }
+
+/*
+    ==========================
+    LOGIN
+    ==========================
+*/
 
 if (loginButton) {
 
@@ -91,14 +116,19 @@ if (loginButton) {
 
             showStatus("Logging in...");
 
-            const userCredential =
+            const credential =
                 await signInWithEmailAndPassword(
                     auth,
                     email,
                     password
                 );
 
-            await ensureUserProfile(userCredential.user);
+            /*
+                Older accounts automatically receive
+                Firestore profiles here.
+            */
+
+            await ensureUserProfile(credential.user);
 
             window.location.href = "dashboard.html";
 
@@ -106,9 +136,9 @@ if (loginButton) {
 
         catch (error) {
 
-            authenticationInProgress = false;
-
             console.error(error);
+
+            authenticationInProgress = false;
 
             showStatus(error.message);
 
@@ -118,13 +148,33 @@ if (loginButton) {
 
 }
 
+/*
+    ==========================
+    ALREADY LOGGED IN
+    ==========================
+*/
+
 onAuthStateChanged(auth, async (user) => {
 
-    if (user && !authenticationInProgress) {
+    if (!user) {
+        return;
+    }
+
+    if (authenticationInProgress) {
+        return;
+    }
+
+    try {
 
         await ensureUserProfile(user);
 
         window.location.href = "dashboard.html";
+
+    }
+
+    catch (error) {
+
+        console.error(error);
 
     }
 
