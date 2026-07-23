@@ -107,8 +107,14 @@ export async function ensureUserProfile(user) {
                 only to specifically selected projects or files.
             */
             specialAccess: {
+                
                 enabled: false,
-                resources: {}
+                resources: {
+                    pipboy3000: false,
+                    vaultOS: false,
+                    authenticationTemplate: true,
+                    espBoy: false
+                }
             },
 
             accountState: "active",
