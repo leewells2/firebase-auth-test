@@ -117,7 +117,7 @@ export async function ensureUserProfile(user) {
                 }
             },
 
-            accountState: "active",
+            accountState: "guest",
 
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp()
